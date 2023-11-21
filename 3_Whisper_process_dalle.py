@@ -24,9 +24,8 @@ Extra Parameters:
 Please ensure that the necessary Python packages (Gradio, OpenAI-Whisper, OpenAI-GPT, and DallE-2) are installed and that the Azure endpoint and key details are correctly set as environment variables for the Azure functionalities.
 """
 import gradio as gr, os
-import openai, azure
+import openai, azure, dotenv
 from  openai import AzureOpenAI
-import azure.cognitiveservices.speech as speechsdk
 from pydub import AudioSegment
 from dotenv import load_dotenv
 
@@ -36,17 +35,16 @@ load_dotenv("azure.env")
 openai.organization = os.getenv('OPENAI_ORGANIZATION')
 
 # Setting Azure OpenAI endpoint parameters
-azure.openai.api_base = os.getenv('AZURE_OPENAI_API_BASE')
-azure.openai.api_key = os.getenv('AZURE_OPENAI_API_KEY')     
-azure.openai.api_version = os.getenv('AZURE_OPENAI_API_VERSION')
-azure.openai.api_type = os.getenv('AZURE_OPENAI_API_TYPE')
+azure.openai_api_base = os.getenv('AZURE_OPENAI_API_BASE')
+azure.openai_api_key = os.getenv('AZURE_OPENAI_API_KEY')     
+azure.openai_api_version = os.getenv('AZURE_OPENAI_API_VERSION')
+azure.openai_api_type = os.getenv('AZURE_OPENAI_API_TYPE')
 
 # Settings Azure Speech & Whisper
+azure.speech_endpoint = os.getenv('AZURE_SPEECH_ENDPOINT')
 azure.whisper_deployment_id = os.getenv('AZURE_WHISPER_DEPLOYMENT_ID')
 azure.whisper_model = os.getenv('AZURE_WHISPER_MODEL')
 azure.whisper_key = os.getenv('AZURE_WHISPER_KEY')
-azure.speech_region = os.getenv('AZURE_SPEECH_REGION')
-azure.speech_endpoint = os.getenv('AZURE_SPEECH_ENDPOINT')
 
 #Settings for DallE
 
@@ -55,20 +53,12 @@ class Dalle:
         self.api_key = None
         self.endpoint = None
 dalle = Dalle()
+
 dalle.api_key = os.getenv('AZURE_DALLE_API_KEY')
 dalle.endpoint = os.getenv('AZURE_DALLE_ENDPOINT')
 
 systemPromptAudio = ""
-def translateAudioLanguage (text2Speech,paramVoice):
 
-        speech_config = speechsdk.SpeechConfig(subscription=azure.speech_key, region=azure.speech_region, language ="en-US")
-        # Note: the voice setting will not overwrite the voice element in input SSML.
-    
-        speech_config.speech_synthesis_voice_name = paramVoice
-                # use the default speaker as audio output.
-        speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
-
-        return speech_synthesizer.speak_text_async(text2Speech).get()
 
 def processAudio(audio1,audio2, choiceParamWhisper, choiceImprove ,systemPromptAudio, temperature = 0, gptChosen = "gpt-35-turbo"):
     if audio1 is None and audio2 is None:
@@ -84,9 +74,9 @@ def processAudio(audio1,audio2, choiceParamWhisper, choiceImprove ,systemPromptA
 
     clientWhisper = AzureOpenAI(
         api_key = azure.whisper_key,
-        azure_deployment= azure.whisper_deployment_id,
         azure_endpoint = azure.speech_endpoint,
-        organization= openai.organization
+        azure_deployment= azure.whisper_deployment_id,
+        api_version= azure.openai_api_version
     )
 
     if choiceParamWhisper == "translate":

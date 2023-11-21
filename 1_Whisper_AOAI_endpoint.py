@@ -2,7 +2,6 @@ import gradio as gr
 import os
 import openai
 from dotenv import load_dotenv
-
 load_dotenv("azure.env")
 # Setting Azure OpenAI endpoint parameters
 openai.api_base = os.getenv('OPENAI_API_BASE')

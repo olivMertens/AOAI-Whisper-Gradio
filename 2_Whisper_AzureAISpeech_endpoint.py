@@ -22,7 +22,16 @@ azure.speech_key = os.getenv('AZURE_SPEECH_KEY')
 azure.speech_region = os.getenv('AZURE_SPEECH_REGION')
 
 
-speech_config = speechsdk.SpeechConfig(subscription=azure.speech_key, region=azure.speech_region)
+
+
+def translateAudioLanguage (text2Speech,paramVoice):
+        speech_config = speechsdk.SpeechConfig(subscription=azure.speech_key, region=azure.speech_region)
+
+        speech_config.speech_synthesis_voice_name = paramVoice
+                # use the default speaker as audio output.
+        speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
+
+        return speech_synthesizer.speak_text_async(text2Speech).get()
 
 def transcribe_from_single_blob(uri, properties):
     """

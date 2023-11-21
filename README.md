@@ -93,7 +93,7 @@ If successful, you should be able to access new Web app's interface at http://12
 :construction:
 :octocat: don't work now :octocat:
 
-:construction:
+:construction:  
 Whisper models are also available through Azure AI Speech. Using batch API (similar to what is described [here](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/python/python-client)), can increase audio file size limit up to 1 Gb.
 
 ```
