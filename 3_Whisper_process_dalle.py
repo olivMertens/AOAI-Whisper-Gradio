@@ -61,7 +61,7 @@ dalle.endpoint = os.getenv('AZURE_DALLE_ENDPOINT')
 systemPromptAudio = ""
 def translateAudioLanguage (text2Speech,paramVoice):
 
-        speech_config = speechsdk.SpeechConfig(subscription=azure.speech_key, region=azure.speech_region)
+        speech_config = speechsdk.SpeechConfig(subscription=azure.speech_key, region=azure.speech_region, language ="en-US")
         # Note: the voice setting will not overwrite the voice element in input SSML.
     
         speech_config.speech_synthesis_voice_name = paramVoice
