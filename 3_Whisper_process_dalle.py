@@ -117,10 +117,10 @@ def countCharacter (input,dalleVersion = "dall-e-2"):
 def processGpt (inputProcess, systemPrompt, temperature = 0, gptChosen = "gpt-35-turbo"):
 
     clientGpt = AzureOpenAI(
-            api_key=openai.api_key,
-            api_version=openai.api_version,
+            api_key=azure.openai_api_key,
+            api_version=azure.openai_api_version,
             azure_deployment=gptChosen,  # i made my deployment id identical to  the model for accelerate and decrease the complexity ( so same var but could be different for you between deployment_id and model)
-            azure_endpoint=openai.api_base
+            azure_endpoint=azure.openai_api_base
     )
 
     answer = clientGpt.chat.completions.create(
@@ -155,8 +155,8 @@ def promptImageDef (promptImage,dalleVersion,dalleSize,dalleQuality,dalleStyle):
     clientDallE = AzureOpenAI(
             api_key=dalle.api_key,
             azure_deployment=dalleVersion,  # i made my deployment id identical to  the model for accelerate and decrease the complexity ( so same var but could be different for you between deployment_id and model)
-            azure_endpoint=dalle.endpoint
-            #api_version="2023-12-01-preview"
+            azure_endpoint=dalle.endpoint,
+            api_version="2023-12-01-preview"
     )
 
     imageGen = clientDallE.images.generate(
@@ -215,9 +215,9 @@ with gr.Blocks() as demo:
         
     with gr.Accordion("Extra params for GPT & DAllE ",open=False):
         temperature= gr.Slider(minimum=0,maximum=1, step=0.1, value=0 ,label="0 deterministic, near or 1 random result")
-        gptChosen = gr.Dropdown(["gpt-4","gpt-4-32k","gpt-35-turbo","gpt-35-turbo-16k"],["GPT4", "GTP4-32k", "GPT3.5TURBO","GPT3.5Turbo16K"],label="GPT model",value="gpt-35-turbo",type="value")
-        dalleVersion = gr.Dropdown( ["dall-e-2", "dall-e-3"],["DallE 2", "DallE 3"], label="DallE version", value="dall-e-2", type="value")
-        dalleSize = gr.Dropdown(["256x256","512x512","1024x1024","1792x1024","1024x1792"],label="DallE size image output",value="512x512",type="value")
+        gptChosen = gr.Dropdown(["gpt-4","gpt-4-32k","gpt-35-turbo","gpt-35-turbo-16k"],["GPT4", "GTP4-32k", "GPT3.5TURBO","GPT3.5Turbo16K"],label="GPT model",value="gpt-4",type="value")
+        dalleVersion = gr.Dropdown( ["dall-e-2", "dall-e-3"],["DallE 2", "DallE 3"], label="DallE version", value="dall-e-3", type="value")
+        dalleSize = gr.Dropdown(["256x256","512x512","1024x1024","1792x1024","1024x1792"],label="DallE size image output",value="1024x1024",type="value")
         dalleStyle = gr.Dropdown(["natural","vivid"], label="DallE style", value="natural", type="value")
         dalleQuality = gr.Dropdown(["standard","hd"],label="DallE quality",value="standard",type="value")
         
