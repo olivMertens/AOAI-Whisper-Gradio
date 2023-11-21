@@ -14,9 +14,8 @@ Functions:
 
 Gradio Interface:
 - Tab 1: Allows users to record or upload an audio file and transcribe or translate it using the Whisper model. Users can also choose to enhance the result with GPT models and provide a system prompt for the output.
-- Tab 2: Allows users to translate the provided text into speech in the specified language using Azure Speech SDK.
-- Tab 3: Allows users to generate text using the GPT model based on the provided input text and system prompt. Users can also choose to generate a JSON output with additional information.
-- Tab 4: Allows users to generate an image using DallE 2 based on the provided prompt.
+- Tab 2: Allows users to generate text using the GPT model based on the provided input text and system prompt. Users can also choose to generate a JSON output with additional information.
+- Tab 3: Allows users to generate an image using DallE 2 based on the provided prompt.
 
 Extra Parameters:
 - temperature: A slider for adjusting the creativity level of the GPT model.
@@ -33,39 +32,33 @@ from dotenv import load_dotenv
 
 load_dotenv("azure.env")
 
-# Setting Azure OpenAI endpoint parameters
-openai.api_base = os.getenv('OPENAI_API_BASE')
-openai.api_key = os.getenv('OPENAI_API_KEY')     
-openai.api_version = os.getenv('OPENAI_API_VERSION')
+# Setting Open Ai organization
 openai.organization = os.getenv('OPENAI_ORGANIZATION')
 
+# Setting Azure OpenAI endpoint parameters
+azure.openai.api_base = os.getenv('AZURE_OPENAI_API_BASE')
+azure.openai.api_key = os.getenv('AZURE_OPENAI_API_KEY')     
+azure.openai.api_version = os.getenv('AZURE_OPENAI_API_VERSION')
+azure.openai.api_type = os.getenv('AZURE_OPENAI_API_TYPE')
 
-openai.api_type = os.getenv('OPENAI_API_TYPE')
-
-#Setting Azure Whisper Endpoint & parameters
+# Settings Azure Speech & Whisper
 azure.whisper_deployment_id = os.getenv('AZURE_WHISPER_DEPLOYMENT_ID')
-azure.whisper_model = os.getenv('AZURE_WHISPER_API_MODEL')
+azure.whisper_model = os.getenv('AZURE_WHISPER_MODEL')
 azure.whisper_key = os.getenv('AZURE_WHISPER_KEY')
 azure.speech_region = os.getenv('AZURE_SPEECH_REGION')
 azure.speech_endpoint = os.getenv('AZURE_SPEECH_ENDPOINT')
 
-#Settings for DallE Tab
+#Settings for DallE
 
 class Dalle:
     def __init__(self):
         self.api_key = None
-        self.api_orga = None
-        self.api_version = None
+        self.endpoint = None
 dalle = Dalle()
-
-dalle.api_key = os.getenv('DALLE_OPENAI_API_KEY')
-dalle.api_orga = os.getenv('DALLE_OPENAI_ORGANIZATION')
-dalle.api_version = os.getenv('DALLE_OPENAI_API_VERSION')
-
+dalle.api_key = os.getenv('AZURE_DALLE_API_KEY')
+dalle.endpoint = os.getenv('AZURE_DALLE_ENDPOINT')
 
 systemPromptAudio = ""
-
-
 def translateAudioLanguage (text2Speech,paramVoice):
 
         speech_config = speechsdk.SpeechConfig(subscription=azure.speech_key, region=azure.speech_region)
@@ -168,12 +161,15 @@ def promptInsert (selectProcess):
 
 def promptImageDef (promptImage,dalleVersion,dalleSize,dalleQuality,dalleStyle):
 
-    clientOpenai = openai.OpenAI(
-        api_key= dalle.api_key,
-        organization= dalle.api_orga
+
+    clientDallE = AzureOpenAI(
+            api_key=dalle.api_key,
+            azure_deployment=dalleVersion,  # i made my deployment id identical to  the model for accelerate and decrease the complexity ( so same var but could be different for you between deployment_id and model)
+            azure_endpoint=dalle.endpoint
+            #api_version="2023-12-01-preview"
     )
 
-    imageGen = clientOpenai.images.generate(
+    imageGen = clientDallE.images.generate(
         prompt=promptImage,
         size=dalleSize,
         n=1,
@@ -203,19 +199,6 @@ with gr.Blocks() as demo:
             article="Interface to whisper model /  Process outputs  /  DallE image generate"
         )
         
-    # with gr.Tab(label="Speech SDK on Azure"):
-    #     with gr.Row():
-    #         with gr.Column():
-    #             text2speechText= gr.TextArea(placeholder="Here is the text to speech",label="Synthetiser speech",show_label=True,interactive=True)
-    #             gr.Interface(
-    #                 translateAudioLanguage,
-    #                 [
-    #                     text2speechText,
-    #                     gr.Dropdown(["en-US", "fr-FR", "de-DE", "it-IT", "es-ES", "th-TH-PremwadeeNeural"],interactive=True, label="Language", info="You can choose the language of the audio file", value="en-US", type="value")
-    #                 ],
-    #             "audio",
-    #             allow_flagging="never",
-    #             ) 
     with gr.Tab(label="Process Audio text by GPT"):
         with gr.Row():
             with gr.Column():

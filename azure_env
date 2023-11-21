@@ -1,25 +1,26 @@
 #OPEN AI
 
-OPENAI_ORGANIZATION = "xxxx"
+OPENAI_ORGANIZATION = "org-xxxxxxxxxxxxx"
+OPENAI_API_TYPE = "openai"
+OPENAI_API_KEY = "sk-xxxxxxxxxxxxx"
 
-# GPT azure Open AI ( AOAI )
-OPENAI_API_BASE = "xxxxx"
-OPENAI_API_KEY = "xxxxx"
-OPENAI_API_VERSION = "2023-09-01-preview"
-OPENAI_API_TYPE = "azure"
+# GPT azure Open AI 
+AZURE_OPENAI_API_BASE = "https://ixxxxxx"
+AZURE_OPENAI_API_KEY = "3d9c80287072461d8a3029e872006b2b"
+AZURE_OPENAI_API_VERSION = "2023-09-01-preview"
+AZURE_OPENAI_API_TYPE = "azure"
 
-# Azure speech on whisper 
+# Whisper on Azure Open AI service
 
-AZURE_WHISPER_API_MODEL = "whisper"
-AZURE_WHISPER_KEY="xxxxxxxx"
-AZURE_WHISPER_DEPLOYMENT_ID = "xxxx"
+AZURE_WHISPER_MODEL = "whisper"
+AZURE_WHISPER_DEPLOYMENT_ID = "ModelWhisperPreview"
+AZURE_WHISPER_KEY="8f21aba6521c4ce5a98369fc6cce4790"
 
 # Azure speech cognitive service
 
-AZURE_SPEECH_ENDPOINT="xxxxxx"
-AZURE_SPEECH_REGION="xxxx"
+AZURE_SPEECH_ENDPOINT="https://westeurope.api.cognitive.microsoft.com/"
+AZURE_SPEECH_REGION="westeurope"
 
-# DallE Api key with OPENAI
-DALLE_OPENAI_API_TYPE = "openai"
-DALLE_OPENAI_API_ORGANISATION = "org-xxxxxxx"
-DALLE_OPENAI_API_KEY = "sk-xxxxxx"
+# Azure with Dall-E
+AZURE_DALLE_API_KEY =""
+AZURE_DALLE_ENDPOINT =""

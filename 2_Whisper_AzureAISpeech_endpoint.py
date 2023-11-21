@@ -9,6 +9,9 @@ import sys
 import requests
 import time
 import swagger_client
+import azure.cognitiveservices.speech as speechsdk
+from dotenv import load_dotenv
+load_dotenv("azure.env")
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG,
         format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
