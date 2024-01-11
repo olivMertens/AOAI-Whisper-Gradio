@@ -26,7 +26,7 @@ The Table of contents below is wrapped into a functional Web interface, powered 
 - [0 - Access to Whisper models in offline mode / local](#0---access-to-whisper-models-in-offline-mode)
 - [1 - Access to Whisper models via Azure OpenAI endpoint](#option-1---access-to-whisper-models-via-azure-openai-endpoint1---access-to-whisper-models-via-azure-openai-endpoint)
 - [2 - Access to Whisper models via Azure AI Speech endpoint](#2---access-to-whisper-models-via-azure-ai-speech-endpoint)
-- [3 - Access to whisper via Azure OpenAI endpoint / process by gpt / generate with Dall-E](#option-3---whisper-model--processing-gpt-and-dall-e-generation)
+- [3 - Access to whisper via AOAI / process by gpt / generate Image / Generate Voice](#option-3---whisper-model--processing-gpt-and-dall-e-generation)
 
 
 

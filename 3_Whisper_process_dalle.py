@@ -5,16 +5,16 @@ This script provides functionalities for processing audio files, translating aud
 
 Functions:
 - translateAudioLanguage(text2Speech, paramVoice): Translates the provided text into speech in the specified language using Azure Speech SDK.
-- processAudio(audio1, audio2, choiceParamWhisper, choiceImprove, systemPromptAudio, temperature, gptChosen): Processes the provided audio file(s) using the Whisper model. It can optionally enhance the result with GPT models.
+- processAudio(audio1, audio2, choiceParamWhisper, choiceImprove, systemPromptAudio, temperature, gptChosen): Processes the provided audio file(s) using the Whisper ASR model. It can optionally enhance the result with GPT models.
 - countCharacter(input): Counts the number of characters in the provided input. Returns an error message if the character count exceeds 1000.
 - updateEveryTextBox(inputProcess, outputProcess): Updates the output text box with the provided input text.
-- processGpt(inputProcess, systemPrompt, temperature, gptChosen): Generates text using the GPT model based on the provided input text and system prompt.
+- processGpt(inputProcess, systemPrompt, temperature, gptChosen): Generates text using the selected GPT model based on the provided input text and system prompt.
 - promptInsert(selectProcess): Generates a system prompt based on the selected process type.
 - promptImageDef(promptImage): Generates an image using DallE 2 based on the provided prompt.
 
 Gradio Interface:
-- Tab 1: Allows users to record or upload an audio file and transcribe or translate it using the Whisper model. Users can also choose to enhance the result with GPT models and provide a system prompt for the output.
-- Tab 2: Allows users to generate text using the GPT model based on the provided input text and system prompt. Users can also choose to generate a JSON output with additional information.
+- Tab 1: Allows users to record or upload an audio file and transcribe or translate it using the Whisper ASR model. Users can also choose to enhance the result with GPT models and provide a system prompt for the output.
+- Tab 2: Allows users to generate text using the selected GPT model based on the provided input text and system prompt. Users can also choose to generate a JSON output with additional information.
 - Tab 3: Allows users to generate an image using DallE 2 based on the provided prompt.
 
 Extra Parameters:
@@ -24,8 +24,8 @@ Extra Parameters:
 Please ensure that the necessary Python packages (Gradio, OpenAI-Whisper, OpenAI-GPT, and DallE-2) are installed and that the Azure endpoint and key details are correctly set as environment variables for the Azure functionalities.
 """
 import gradio as gr, os
-import openai, azure, dotenv
-from  openai import AzureOpenAI
+import openai, dotenv
+from openai import AzureOpenAI
 from pydub import AudioSegment
 from dotenv import load_dotenv
 
@@ -33,6 +33,15 @@ load_dotenv("azure.env")
 
 # Setting Open Ai organization
 openai.organization = os.getenv('OPENAI_ORGANIZATION')
+
+
+class Azure:
+    def __init__(self):
+        self.api_base = None
+        self.api_key = None
+        self.api_version = None
+        self.api_type = None
+azure = Azure()
 
 # Setting Azure OpenAI endpoint parameters
 azure.openai_api_base = os.getenv('AZURE_OPENAI_API_BASE')
@@ -102,12 +111,9 @@ def processAudio(audio1,audio2, choiceParamWhisper, choiceImprove ,systemPromptA
         return whisperResult
 
     
-def countCharacter (input,dalleVersion = "dall-e-2"):
-            if dalleVersion == "dall-e-2":
-                numberCharacter = 1000
-            else:
-                numberCharacter = 4000
-
+def countCharacter (input,dalleVersion = "dall-e-3"):
+            
+            numberCharacter = 4000
             if len(input) > numberCharacter:
                     return "Input is too long! Maximum length is "+numberCharacter+" characters."
             else:
@@ -156,7 +162,7 @@ def promptImageDef (promptImage,dalleVersion,dalleSize,dalleQuality,dalleStyle):
             api_key=dalle.api_key,
             azure_deployment=dalleVersion,  # i made my deployment id identical to  the model for accelerate and decrease the complexity ( so same var but could be different for you between deployment_id and model)
             azure_endpoint=dalle.endpoint,
-            api_version="2023-12-01-preview"
+            api_version=azure.openai_api_version
     )
 
     imageGen = clientDallE.images.generate(
@@ -176,8 +182,8 @@ with gr.Blocks() as demo:
         gr.Interface(
             processAudio, 
             [
-                gr.Audio(source="microphone", type="filepath", label="Record Audio", show_label=True,  show_download_button=True),
-                gr.Audio(source="upload", type="filepath", label="Upload Audio", show_label=True),
+                gr.Audio(sources="microphone", type="filepath", label="Record Audio", show_label=True,  show_download_button=True),
+                gr.Audio(sources="upload", type="filepath", label="Upload Audio", show_label=True),
                 gr.Radio(["transcribe", "translate"], ["Transcribe with same language", "translate in english"], label="Translate or Transcribe", show_label=True, value="transcribe"),
                 gr.Radio(["no","yes"], label="improve the result with GPT model", show_label=True, value="no"),
                 gr.Text(lines=1, label="Prompt system for the output", show_label=True, value="You are a helpful assistant for a call center and you have to describe quickly and give some observations about the situation"),
@@ -200,11 +206,11 @@ with gr.Blocks() as demo:
                 promptPlace= gr.TextArea(placeholder="Here is the prompt",label="Prompt for process request", show_label=True,interactive=True)
                 
                 buttonSpeech = gr.Button('Process the audio speech',variant="primary")
-                gr.ClearButton([promptPlace,text2ProcessGpt],value="Clear Prompt",show_label=False)
+                gr.ClearButton([promptPlace,text2ProcessGpt],value="Clear Prompt")
             with gr.Column():
                 text = gr.TextArea(autoscroll=False, placeholder="Result with your prompting/ask",label="Results from post processing",show_copy_button=True)
                 
-    with gr.Tab(label="Create Image with DallE 2 or 3"):
+    with gr.Tab(label="Create Image - DallE"):
         with gr.Row():
             with gr.Column():
                 promptImage= gr.Textbox(lines=20, placeholder="Your prompt for creating image",label="Prompt to DallE")
@@ -212,12 +218,19 @@ with gr.Blocks() as demo:
                 buttonProcessImage = gr.Button('Generate image from prompt',variant="primary")
             with gr.Column():
                 imageGen = gr.Image(label="image generate by DallE")
-        
-    with gr.Accordion("Extra params for GPT & DAllE ",open=False):
+    with gr.Tab(label="Generate audio with voice"):
+        with gr.Row():
+            with gr.Column():
+                text2Speech = gr.Textbox(lines=4, placeholder="Your text for speech",label="Text to speech",show_label=True)
+                paramVoice = gr.Radio(["en-US-AriaNeural","en-US-GuyNeural","en-US-JennyNeural","en-US-AriaNeural","PhoenixV2Neural"], label="Choose your Voice", show_label=True, value="en-US-AriaNeural")
+                buttonVoice = gr.Button('Generate audio from text',variant="primary") 
+            with gr.Column():
+                audio = gr.Audio(label="audio generate by Azure speech") 
+    with gr.Accordion("Extra params ",open=False):
         temperature= gr.Slider(minimum=0,maximum=1, step=0.1, value=0 ,label="0 deterministic, near or 1 random result")
         gptChosen = gr.Dropdown(["gpt-4","gpt-4-32k","gpt-35-turbo","gpt-35-turbo-16k"],["GPT4", "GTP4-32k", "GPT3.5TURBO","GPT3.5Turbo16K"],label="GPT model",value="gpt-4",type="value")
-        dalleVersion = gr.Dropdown( ["dall-e-2", "dall-e-3"],["DallE 2", "DallE 3"], label="DallE version", value="dall-e-3", type="value")
-        dalleSize = gr.Dropdown(["256x256","512x512","1024x1024","1792x1024","1024x1792"],label="DallE size image output",value="1024x1024",type="value")
+        dalleVersion = gr.Dropdown( ["dall-e-3"], label="DallE version", value="dall-e-3", type="value")
+        dalleSize = gr.Dropdown(["1024x1024","1792x1024","1024x1792"],label="Size image",value="1024x1024",type="value")
         dalleStyle = gr.Dropdown(["natural","vivid"], label="DallE style", value="natural", type="value")
         dalleQuality = gr.Dropdown(["standard","hd"],label="DallE quality",value="standard",type="value")
         
